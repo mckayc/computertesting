@@ -1,4 +1,11 @@
 /*
+What is this?
+This is a simple Google App Script that you can run in a Google sheet. 
+It populates random numbers and multiplies them together. It does this 
+100 times then gives a time to complete. 
+This is useful for comparing computers to see how fast the CPU is for 
+Calculating Google sheets processes.
+
 Instructions:
 1. Open your Google Spreadsheet.
 2. Go to Extensions > Apps Script.
