@@ -1,3 +1,4 @@
+// This is a benchmark script that populates random numbers then adds it together.
 // Instructions for installing and running the script:
 // 1. Open your Google Spreadsheet.
 // 2. Go to Extensions > Apps Script.
@@ -32,14 +33,14 @@ function startBenchmark() {
   // Loop 100 times
   for (var loop = 1; loop <= 100; loop++) {
     // Populating random numbers
-    for (var i = 1; i <= 30; i++) {
+    for (var i = 1; i <= 5; i++) {
       for (var j = 7; j <= 11; j++) {
         sheet.getRange(i, j).setValue(Math.floor(Math.random() * 1000));
       }
     }
 
     // Calculating row sums
-    for (var i = 1; i <= 30; i++) {
+    for (var i = 1; i <= 5; i++) {
       var sum = 0;
       for (var j = 7; j <= 11; j++) {
         sum += sheet.getRange(i, j).getValue();
@@ -50,10 +51,10 @@ function startBenchmark() {
     // Increase progress by 1%
     var currentProgress = parseInt(sheet.getRange("B2").getValue());
     sheet.getRange("B2").setValue((currentProgress + 1) + " %");
-
-    // Wait for 1 second
-    Utilities.sleep(1000);
   }
+
+  // Calculate and set average in E2
+  sheet.getRange("E2").setFormula('=AVERAGE(E4:E)');
 
   // Set stop time
   var stopTime = new Date();
