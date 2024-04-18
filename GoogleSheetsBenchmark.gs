@@ -1,91 +1,78 @@
-/*
-What is this?
-This is a simple Google App Script that you can run in a Google sheet. 
-It populates random numbers and multiplies them together. It does this 
-100 times then gives a time to complete. 
-This is useful for comparing computers to see how fast the CPU is for 
-Calculating Google sheets processes.
+// Instructions for installing and running the script:
+// 1. Open your Google Spreadsheet.
+// 2. Go to Extensions > Apps Script.
+// 3. Paste the following code into the script editor.
+// 4. Save the project with a name.
+// 5. Close the script editor.
+// 6. Refresh the spreadsheet, and a new menu item "Run Benchmark" should appear.
+// 7. Click on "Run Benchmark" to execute the benchmark test.
 
-Instructions:
-1. Open your Google Spreadsheet.
-2. Go to Extensions > Apps Script.
-3. Delete any code in the script editor and replace it with the code below.
-4. Save the script.
-5. Run the script. Go to your Spreadsheet to check the progress.
-*/
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('Run Benchmark')
+      .addItem('Start Benchmark', 'startBenchmark')
+      .addToUi();
+}
 
-function benchmark() {
+function startBenchmark() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-
-  // Set Start Time
-  sheet.getRange("B1").setValue(new Date()).setNumberFormat("yyyy-MM-dd - HH:mm:ss");
+  
+  // Setting up initial data
+  sheet.getRange("A1").setValue("Start Time:");
+  sheet.getRange("B1").setValue(new Date());
+  sheet.getRange("A2").setValue("Progress...");
   sheet.getRange("B2").setValue("0 %");
+  sheet.getRange("A3").setValue("Stop Time:");
   sheet.getRange("B3").setValue("In Progress");
+  sheet.getRange("A4").setValue("Total Time:");
   sheet.getRange("B4").setValue("In Progress");
+  sheet.getRange("D1").setValue("Test Time");
+  sheet.getRange("E1").setValue("All Tests Ave");
 
-  for (var i = 0; i < 100; i++) {
-    // Populate D1:K30 with random numbers
-    populateRandomNumbers(sheet);
-
-    // Calculate product in column M
-    calculateProduct(sheet);
-
-    // Increase Progress
-    increaseProgress(sheet);
-
-    // Delete data in D1:M30
-    clearData(sheet);
-  }
-
-  // Set Stop Time
-  sheet.getRange("B3").setValue(new Date()).setNumberFormat("yyyy-MM-dd - HH:mm:ss");
-
-  // Calculate Total Time
-  calculateTotalTime(sheet);
-
-  // Rename Spreadsheet
-  renameSpreadsheet(sheet);
-}
-
-function populateRandomNumbers(sheet) {
-  var range = sheet.getRange("D1:K30");
-  var values = range.getValues();
-
-  for (var i = 0; i < values.length; i++) {
-    for (var j = 0; j < values[i].length; j++) {
-      values[i][j] = Math.floor(Math.random() * 89999999) + 9999999;
+  // Loop 100 times
+  for (var loop = 1; loop <= 100; loop++) {
+    // Populating random numbers
+    for (var i = 1; i <= 30; i++) {
+      for (var j = 7; j <= 11; j++) {
+        sheet.getRange(i, j).setValue(Math.floor(Math.random() * 1000));
+      }
     }
+
+    // Calculating row sums
+    for (var i = 1; i <= 30; i++) {
+      var sum = 0;
+      for (var j = 7; j <= 11; j++) {
+        sum += sheet.getRange(i, j).getValue();
+      }
+      sheet.getRange(i, 13).setValue(sum);
+    }
+
+    // Increase progress by 1%
+    var currentProgress = parseInt(sheet.getRange("B2").getValue());
+    sheet.getRange("B2").setValue((currentProgress + 1) + " %");
+
+    // Wait for 1 second
+    Utilities.sleep(1000);
   }
 
-  range.setValues(values);
-}
+  // Set stop time
+  var stopTime = new Date();
+  sheet.getRange("B3").setValue(stopTime);
+  var lastRow = sheet.getLastRow();
 
-function calculateProduct(sheet) {
-  var range = sheet.getRange("M1:M30");
-  range.setFormulaR1C1("=PRODUCT(RC[-9]:RC[-1])");
-}
+  // Copy stop time to next empty cell underneath D3
+  sheet.getRange(lastRow + 1, 4).setValue(stopTime);
 
-function increaseProgress(sheet) {
-  var progress = parseInt(sheet.getRange("B2").getValue());
-  sheet.getRange("B2").setValue((progress + 1) + " %");
-}
-
-function clearData(sheet) {
-  var range = sheet.getRange("D1:M30");
-  range.clear();
-}
-
-function calculateTotalTime(sheet) {
+  // Calculate total time
   var startTime = sheet.getRange("B1").getValue();
-  var stopTime = sheet.getRange("B3").getValue();
   var totalTime = (stopTime - startTime) / 1000; // in seconds
-
   sheet.getRange("B4").setValue(totalTime + " seconds");
-}
 
-function renameSpreadsheet(sheet) {
-  var startTime = sheet.getRange("B1").getValue();
-  var totalTime = sheet.getRange("B4").getValue().split(" ")[0];
-  var newName = Utilities.formatDate(startTime, Session.getScriptTimeZone(), "yyyy-MM-dd - HH:mm") + " - Benchmark - " + totalTime + " seconds";
-  sheet.getParent().rename(newName);
+  // Copy total time to next empty cell underneath E3
+  sheet.getRange(lastRow + 1, 5).setValue(totalTime);
+
+  // Rename spreadsheet
+  var formattedStartTime = Utilities.formatDate(startTime, Session.getScriptTimeZone(), "yyyy-MM-dd - HH:mm:ss");
+  var spreadsheetName = formattedStartTime + " - Benchmark - " + totalTime + " seconds";
+  SpreadsheetApp.getActiveSpreadsheet().rename(spreadsheetName);
 }
